@@ -8,13 +8,19 @@ fi
 arg=$1
 dir="$arg"
 
+if [ -d $dir ] ; then
+    echo "Directory "$dir" already exists"
+    echo "Exiting"
+    exit 1
+fi
+
 # Create directory
 mkdir -p "$dir"
 
 # Create Makefile
 cat <<EOF > "$dir/Makefile"
 CC = gcc
-CFLAGS = -Wall -Wextra -O2
+CFLAGS = -Wall -Wextra -g -pg
 
 TARGET = day$arg
 SRC = \$(TARGET).c
