@@ -147,12 +147,12 @@ int main() {
 
   
   //Scan 
-  uint32_t scanned;
+  int vector_length;
   int *vectorA, *vectorB;
-  scanned = convert_input(input, &vectorA, &vectorB);
-  printf("%d elements converted\n", scanned);
+  vector_length = convert_input(input, &vectorA, &vectorB);
+  printf("%d elements converted\n", vector_length);
 #if 0
-  for(int i = 0; i < scanned; i++)
+  for(int i = 0; i < vector_length; i++)
     printf("%d: %d %d\n",
 	   i,
 	   vectorA[i],
@@ -160,10 +160,10 @@ int main() {
 #endif
   
   //Sort 
-  qsort(vectorA, scanned, sizeof(int), compare_int);
-  qsort(vectorB, scanned, sizeof(int), compare_int);
+  qsort(vectorA, vector_length, sizeof(int), compare_int);
+  qsort(vectorB, vector_length, sizeof(int), compare_int);
 #if 0
-  for(int i = 0; i < scanned; i++)
+  for(int i = 0; i < vector_length; i++)
     printf("%d: %d %d\n",
 	   i,
 	   vectorA[i],
@@ -172,7 +172,7 @@ int main() {
 
   //Reduce (absolute sum of differences)
   uint64_t sum_of_distances = 0;
-  for(int i = 0; i < scanned; i++) 
+  for(int i = 0; i < vector_length; i++) 
     sum_of_distances += ( vectorA[i] > vectorB[i] ?
 			  vectorA[i] - vectorB[i] :
 			  vectorB[i] - vectorA[i] );
@@ -181,12 +181,12 @@ int main() {
 
   //Count occurences
   //Need not be unique in vectorA 
-  int *occurences = xmalloc(scanned * sizeof(int));
-  for(int i=0; i < scanned; i++) 
-    occurences[i] = count_occurences(vectorB, scanned, vectorA[i]);
+  int *occurences = xmalloc(vector_length * sizeof(int));
+  for(int i=0; i < vector_length; i++) 
+    occurences[i] = count_occurences(vectorB, vector_length, vectorA[i]);
 
 #if 0
-  for (int i = 0; i < scanned; i++)
+  for (int i = 0; i < vector_length; i++)
     if (occurences[i])
            printf("%d: %d\n", vectorA[i], occurences[i]);
   //Note: there arent really that many
@@ -194,7 +194,7 @@ int main() {
 
   //Reduce (value * occurences)
   uint64_t similarity_score = 0;
-  for (int i = 0; i < scanned; i++)
+  for (int i = 0; i < vector_length; i++)
     if (occurences[i])
       similarity_score += occurences[i]*vectorA[i];
   

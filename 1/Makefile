@@ -1,10 +1,19 @@
-CC=gcc
-CFLAGS=-g -Wall
+CC = gcc
+CFLAGS = -Wall -Wextra -g -pg
 
-all: day1
+TARGET = day1
+SRC = $(TARGET).c
+OBJ = $(TARGET).o
 
-day1: day1.c
-	$(CC) $(CFLAGS) -o day1 day1.c
+all: $(TARGET)
+
+$(TARGET): $(OBJ)
+	$(CC) -o $(TARGET) $(OBJ)
+
+$(OBJ): $(SRC)
+	$(CC) $(CFLAGS) -c $(SRC)
 
 clean:
-	rm -f day1
+	rm -f $(OBJ) $(TARGET)
+
+.PHONY: all clean
