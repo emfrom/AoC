@@ -1,4 +1,4 @@
-input
+input*
 *.o
 day[1-9]
 day[1][0-9]
