@@ -110,22 +110,47 @@ int quick_check(char *expr)
 
 int main()
 {
+
+    //Load input (as char blob)
     size_t size;
     char *input = xload_file("input", &size);
-    char *temp = input;
-    char *end_of_file = input + size;
-
-    int mult_active = 1;
-    const char *switch_string[] = { "do()", "don't()" };
-    char *next_switch = strstr(input, switch_string[mult_active]);
 
 
+    // Problem 1
     uint64_t sum = 0;
+    char *temp = input;
 
     while (NULL != (temp = strstr(temp, "mul("))) {
         temp += 4;
 
-#if 1                           //Problem 2
+        if (quick_check(temp)) {
+            int a, b;
+
+            if (2 == sscanf(temp, "%d,%d", &a, &b)) {
+#if 0
+                printf("%.*s\n", 15, temp);
+#endif
+                sum += a * b;
+            }
+        }
+    }
+
+    printf("Problem 1 sum is: %ld\n", sum);
+
+
+
+    // Problem 2
+    sum = 0;
+    temp = input;
+
+    char *end_of_file = input + size;
+    int mult_active = 1;
+    const char *switch_string[] = { "do()", "don't()" };
+    char *next_switch = strstr(input, switch_string[mult_active]);
+
+    while (NULL != (temp = strstr(temp, "mul("))) {
+        temp += 4;
+
         while (temp > next_switch) {
             mult_active = (mult_active + 1) % 2;
 
@@ -137,23 +162,16 @@ int main()
 
         if (!mult_active)
             continue;
-#endif
 
         if (quick_check(temp)) {
             int a, b;
 
-            if (2 == sscanf(temp, "%d,%d", &a, &b)) {
-#if 0
-                char toprint[15];
-                strncpy(toprint, temp, 15);
-                printf("%s\n", toprint);
-#endif
+            if (2 == sscanf(temp, "%d,%d", &a, &b))
                 sum += a * b;
-            }
         }
     }
 
-    printf("The sum is: %ld\n", sum);
+    printf("Problem 2 sum is: %ld\n", sum);
 
     return EXIT_SUCCESS;
 }
