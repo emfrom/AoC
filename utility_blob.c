@@ -178,3 +178,26 @@ char **xload_lines(const char *filename, uint64_t *number_lines)
 
     return lines;
 }
+
+#ifdef USE_REGEX
+#include <regex.h>
+
+char *xregex_search(const char *haystack, const char *pattern)
+{
+    regex_t regex;
+    regmatch_t match;
+
+    if (regcomp(&regex, pattern, REG_EXTENDED) != 0) {
+        fprintf(stderr, "xregex_search() -> Regex compilation error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (regexec(&regex, haystack, 1, &match, 0) == 0) {
+        regfree(&regex);
+        return (char *) haystack + match.rm_so;
+    }
+
+    regfree(&regex);
+    return NULL;
+}
+#endif
