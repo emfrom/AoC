@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-
-#define USE_REGEX
 #include "../utility_blob.c"
 
 
@@ -19,11 +17,12 @@ int main()
     uint64_t sum = 0;
     char *temp = input;
 
-    while (NULL != (temp = xregex_search(temp, "mul\\([0-9]+,[0-9]+\\)"))) {
+    while (NULL != (temp = strstr(temp, "mul("))) {
         temp += 4;
         int a, b;
+        char c;
 
-        if (2 == sscanf(temp, "%d,%d", &a, &b))
+        if (3 == sscanf(temp, "%d,%d%c", &a, &b, &c) && c == ')')
             sum += a * b;
     }
 
@@ -40,7 +39,7 @@ int main()
     const char *switch_string[] = { "do()", "don't()" };
     char *next_switch = strstr(input, switch_string[mult_active]);
 
-    while (NULL != (temp = xregex_search(temp, "mul\\([0-9]+,[0-9]+\\)"))) {
+    while (NULL != (temp = strstr(temp, "mul("))) {
         temp += 4;
 
         while (temp > next_switch) {
@@ -56,7 +55,8 @@ int main()
             continue;
 
         int a, b;
-        if (2 == sscanf(temp, "%d,%d", &a, &b))
+        char c;
+        if (3 == sscanf(temp, "%d,%d%c", &a, &b, &c) && c == ')')
             sum += a * b;
     }
 
