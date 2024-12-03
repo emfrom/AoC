@@ -121,10 +121,10 @@ int main() {
     while (NULL != (temp = strstr(temp, "mul("))) {
       temp += 3;
 
-      if(temp > next_switch) {
+      while(temp > next_switch) {
 	mult_active = (mult_active + 1 ) % 2;
 	 
-	next_switch = strstr(input,switch_string[mult_active]);
+	next_switch = strstr(next_switch,switch_string[mult_active]);
 
 	if(NULL == next_switch)
 	  next_switch = end_of_file;
