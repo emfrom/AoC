@@ -78,11 +78,9 @@ char *xload_file(const char *filename, size_t *size) {
     return return_value;
 }
 
+// match on [0-9]+,[0-9]+\)
+// Using a regex lib would make this function twice as big (minimum)
 int quick_check(char *expr) {
-    if (*expr != '(')
-      return 0;
-
-    expr++;
     if (!isdigit(*expr))
       return 0;
 
@@ -119,8 +117,9 @@ int main() {
     uint64_t sum = 0;
 
     while (NULL != (temp = strstr(temp, "mul("))) {
-      temp += 3;
+      temp += 4;
 
+#if 1 //Problem 2
       while(temp > next_switch) {
 	mult_active = (mult_active + 1 ) % 2;
 	 
@@ -132,15 +131,16 @@ int main() {
 
       if(!mult_active)
 	continue;
+#endif
       
       if (quick_check(temp)) {
       int a, b;
 
-      if (2 == sscanf(temp, "(%d,%d)", &a, &b)) {
+      if (2 == sscanf(temp, "%d,%d", &a, &b)) {
 #if 0
         char toprint[15];
-      strncpy(toprint, temp, 15);
-      printf("%s\n", toprint);
+        strncpy(toprint, temp, 15);
+        printf("%s\n", toprint);
 #endif
         sum += a * b;
       }
