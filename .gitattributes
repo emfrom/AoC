@@ -1,0 +1,2 @@
+*.c filter=krstyle
+*.h filter=krstyle
