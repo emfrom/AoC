@@ -158,7 +158,8 @@ char **xload_lines(const char *filename, uint64_t *number_lines)
     size = (num_lines + 1) * sizeof(char *);
     lines[num_lines] = NULL;
 
-
+    //Guaranteed leak
+#if 0
     //One memory location to rule them all
     size_t total_size = filesize + size;
     lines = xrealloc(lines, total_size);
@@ -172,6 +173,7 @@ char **xload_lines(const char *filename, uint64_t *number_lines)
 
     for (unsigned int i = 0; i < num_lines; i++)
         lines[i] = lines[i] + adjustment;
+#endif
 
     if (NULL != number_lines)
         *number_lines = num_lines;
@@ -179,7 +181,6 @@ char **xload_lines(const char *filename, uint64_t *number_lines)
     return lines;
 }
 
-#ifdef USE_REGEX
 #include <regex.h>
 
 char *xregex_search(const char *haystack, const char *pattern)
@@ -200,4 +201,83 @@ char *xregex_search(const char *haystack, const char *pattern)
     regfree(&regex);
     return NULL;
 }
+
+
+typedef struct linked_list_s *linked_list;
+struct linked_list_s {
+    void *data;
+    linked_list next;
+};
+
+linked_list linked_list_prepend(linked_list head, void *data)
+{
+    linked_list new_node =
+        (linked_list) xmalloc(sizeof(struct linked_list_s));
+    new_node->data = data;
+    new_node->next = head;
+    return new_node;
+}
+
+#if REALLY_NECESSARY
+linked_list linked_list_append(linked_list head, void *data)
+{
+    linked_list new_node =
+        (linked_list) xmalloc(sizeof(struct linked_list_s));
+    new_node->data = data;
+    new_node->next = NULL;
+
+    if (!head)
+        return new_node;
+
+    linked_list current = head;
+    while (current->next) {
+        current = current->next;
+    }
+    current->next = new_node;
+    return head;
+}
 #endif
+
+
+linked_list linked_list_duplicate(linked_list head)
+{
+    if (!head) {
+        return NULL;
+    }
+
+    linked_list new_head =
+        (linked_list) xmalloc(sizeof(struct linked_list_s));
+    new_head->data = head->data;
+    new_head->next = NULL;
+
+    linked_list current = head->next;
+    linked_list new_current = new_head;
+
+    while (current) {
+        linked_list new_node =
+            (linked_list) xmalloc(sizeof(struct linked_list_s));
+        new_node->data = current->data; // Shallow copy
+        new_node->next = NULL;
+
+        new_current->next = new_node;
+        new_current = new_node;
+        current = current->next;
+    }
+
+    return new_head;
+}
+
+linked_list linked_list_destroy(linked_list head,
+                                void (*destroy_data)(void *data))
+{
+    linked_list current = head;
+    while (current) {
+        linked_list next = current->next;
+        if (NULL != destroy_data)
+            destroy_data(current->data);
+        xfree(current);
+        current = next;
+    }
+
+    return NULL;
+}

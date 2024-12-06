@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include "../utility_blob.c"
 
-// There are less than 128 actual pages => uint8_t
+// There are less than 100 actual pages, uint8_t will do
 // This also means that each page can at most be before or after 128 entries
 // Using two sorted arrays per entry is enough (and fast)
 //
