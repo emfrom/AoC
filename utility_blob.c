@@ -83,7 +83,7 @@ char *xload_file(const char *filename, size_t *size)
 }
 
 
-char **xload_lines(const char *filename, uint64_t *number_lines)
+char **xload_lines(const char *filename, int *number_lines)
 {
 
     char *file_content;
@@ -158,13 +158,12 @@ char **xload_lines(const char *filename, uint64_t *number_lines)
     size = (num_lines + 1) * sizeof(char *);
     lines[num_lines] = NULL;
 
-    //Guaranteed leak
-#if 0
+
     //One memory location to rule them all
     size_t total_size = filesize + size;
     lines = xrealloc(lines, total_size);
 
-    char *file_content2 = (char *) &(lines[num_lines + 2]);
+    char *file_content2 = (char *) &(lines[num_lines + 1]);
     memcpy(file_content2, file_content, filesize);
     xfree(file_content);
 
@@ -173,7 +172,7 @@ char **xload_lines(const char *filename, uint64_t *number_lines)
 
     for (unsigned int i = 0; i < num_lines; i++)
         lines[i] = lines[i] + adjustment;
-#endif
+
 
     if (NULL != number_lines)
         *number_lines = num_lines;
