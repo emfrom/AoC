@@ -54,6 +54,7 @@ void threadrun(int n_threads,
                void * (*collate)(void *),
                void * (*get_input)(void *), void *user_data)
 {
+
     pthread_t *threads = xmalloc(sizeof(pthread_t) * n_threads);
     thread_args_t args;
     pthread_mutex_t get_input_mutex, collate_mutex;
@@ -87,48 +88,3 @@ void threadrun(int n_threads,
 
     xfree(threads);
 }
-
-
-
-#ifdef THREADRUN_TEST
-
-void *operation(void *arg)
-{
-    int *num = (int *) arg;
-    int *result = malloc(sizeof(int));
-    *result = (*num) * 2;       // Example: double the input
-    return result;
-}
-
-void *collate_function(void *arg)
-{
-    int *result = (int *) arg;
-    printf("Result: %d\n", *result);
-    free(result);
-    return NULL;
-}
-
-void *get_input(void *arg)
-{
-    arg = arg;
-
-    static int counter = 0;
-
-    if (counter > 10)
-        return NULL;
-
-    int *input = malloc(sizeof(int));
-    *input = counter++;         // Example: Incremental inputs
-
-
-    return input;
-}
-
-int main()
-{
-    printf("Should be: 0, 2, 4, .. , 20 (in some order)\n\n");
-    threadrun(8, operation, collate_function, get_input, NULL);
-    return 0;
-}
-
-#endif
