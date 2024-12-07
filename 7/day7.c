@@ -116,5 +116,7 @@ int main()
     printf("Problem 2: %ld\n", sum_of_valids);
 #endif
 
+    xfree(input);
+
     return EXIT_SUCCESS;
 }
