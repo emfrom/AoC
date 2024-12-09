@@ -8,8 +8,10 @@
 // Notes: Day 8
 // (On the road and very tired)
 //
-// Not a pretty solutions but it worked 
+// Not a pretty solutions but it worked
 // Tried to prettyfiy it and broke it so, sleeptime.
+//
+// Day after, all prettyfied
 
 typedef struct cordinate_s *cordinate;
 struct cordinate_s {
