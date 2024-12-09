@@ -296,7 +296,7 @@ field field_create()
 
     field_data = xmalloc(sizeof(struct field_s));
 
-    field_data->layout = xload_lines("input", &n_lines);
+    field_data->layout = xload_lines("input", &n_lines);        //For AoC
     field_data->ysize = n_lines;
     field_data->xsize = strlen(field_data->layout[0]);
 
@@ -321,7 +321,9 @@ int field_inbounds(field playarea, int x, int y)
 
 void field_destroy(field playarea)
 {
+    xfree(playarea->layout);
     xfree(playarea);
+
 }
 
 char field_get(field area, int x, int y)
@@ -332,4 +334,21 @@ char field_get(field area, int x, int y)
 void field_set(field area, int x, int y, char c)
 {
     area->layout[y][x] = c;
+}
+
+field field_soliton = NULL;
+
+void field_soliton_destroy()
+{
+    if (NULL != field_soliton)
+        field_destroy(field_soliton);
+}
+
+field field_soliton_get()
+{
+    if (NULL == field_soliton) {
+        field_soliton = field_create();
+        atexit(field_soliton_destroy);
+    }
+    return field_soliton;
 }
