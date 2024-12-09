@@ -12,7 +12,7 @@ const int dx[8] = { -1, 1, 1, -1, -1, 0, 1, 0 };
 const int dy[8] = { -1, -1, 1, 1, 0, -1, 0, 1 };
 
 //Field of play, assign once
-char **field;
+char **playarea;
 int xsize;
 int ysize;
 
@@ -35,13 +35,13 @@ bool match_mas(int dir, int step, int x, int y)
     if (!valid_coordinate(x, y))
         return false;
 
-    return field[y][x] == target_string[step];
+    return playarea[y][x] == target_string[step];
 }
 
 int check_coordinate_xmas(int x, int y)
 {
 
-    if (field[y][x] != 'X')
+    if (playarea[y][x] != 'X')
         return 0;
 
     int num_matches = 0;
@@ -55,7 +55,7 @@ int check_coordinate_xmas(int x, int y)
 int check_coordinate_x_mas(int x, int y)
 {
 
-    if (field[y][x] != 'A')
+    if (playarea[y][x] != 'A')
         return 0;
 
     int num_matches = 0;
@@ -72,15 +72,15 @@ int check_coordinate_x_mas(int x, int y)
 int main()
 {
 
-    uint64_t lines;
-    field = xload_lines("input", &lines);
+    int lines;
+    playarea = xload_lines("input", &lines);
 
     ysize = lines;
-    xsize = strlen(field[0]);
+    xsize = strlen(playarea[0]);
 
 #if 0
     for (int i = 1; i < ysize; i++)
-        if (xsize != (int) strlen(field[i])) {
+        if (xsize != (int) strlen(playarea[i])) {
             fprintf(stderr, "main() -> uneven line length\n");
             exit(EXIT_FAILURE);
         }
