@@ -64,7 +64,6 @@ cordinate cordinate_get_antinode(cordinate cordA, cordinate cordB)
     return cordinate_create(cordA->x + dx, cordA->y + dy);
 }
 
-int xsize, ysize;
 
 cordinate cordinate_get_antinodes(cordinate cordA, cordinate cordB)
 {
@@ -79,8 +78,9 @@ cordinate cordinate_get_antinodes(cordinate cordA, cordinate cordB)
     cordinate antinodes = NULL;
 
     int count = 0;
+    field area = field_soliton_get();
 
-    while (x >= 0 && y >= 0 && x < xsize && y < ysize) {
+    while (field_inbounds(area, x, y)) {
         antinodes = cordinate_chain(cordinate_create(x, y), antinodes);
 
         count++;
@@ -110,18 +110,15 @@ int frequency_index(char c)
 
 int main()
 {
-    int n_lines;
-    char **input = xload_lines("input", &n_lines);
+    field area;
+    area = field_soliton_get();
 
-
-    xsize = strlen(input[0]);
-    ysize = n_lines;
 
     cordinate tower_list[N_FREQUENCIES] = { NULL };
-    for (int y = 0; y < ysize; y++)
-        for (int x = 0; x < xsize; x++)
-            if (isalnum(input[y][x])) {
-                int index = frequency_index(input[y][x]);
+    for (int y = 0; field_inbounds(area, 0, y); y++)
+        for (int x = 0; field_inbounds(area, x, 0); x++)
+            if (isalnum(field_get(area, x, y))) {
+                int index = frequency_index(field_get(area, x, y));
 
                 tower_list[index] =
                     cordinate_chain(cordinate_create(x, y),
@@ -163,8 +160,8 @@ int main()
         x = antinode_cords->x;
         y = antinode_cords->y;
 
-        if (x >= 0 && y >= 0 && x < xsize && y < ysize)
-            input[y][x] = '#';
+        if (field_inbounds(area, x, y))
+            field_set(area, x, y, '#');
 
         cordinate temp = antinode_cords;
         antinode_cords = antinode_cords->next;
@@ -172,18 +169,14 @@ int main()
     }
 
     int num_antinodes = 0;
-
-    for (int y = 0; y < ysize; y++) {
-#if 0
-        printf("%s\n", input[y]);
-#endif
-
-        for (int x = 0; x < xsize; x++)
-            if (input[y][x] == '#')
+    for (int y = 0; field_inbounds(area, 0, y); y++)
+        for (int x = 0; field_inbounds(area, x, 0); x++)
+            if (field_get(area, x, y) == '#')
                 num_antinodes++;
-    }
 
     printf("Number of antinodes(p1): %d\n", num_antinodes);
+
+
 
     //Problem 2
     num_antinodes = 0;
@@ -225,33 +218,28 @@ int main()
                 xfree(temp_inner);
             }
         }
+
     //Plot them to remove duplicates
     while (NULL != antinode_cords) {
         int x, y;
         x = antinode_cords->x;
         y = antinode_cords->y;
 
-        if (x >= 0 && y >= 0 && x < xsize && y < ysize)
-            input[y][x] = '#';
+        if (field_inbounds(area, x, y))
+            field_set(area, x, y, '#');
 
         cordinate temp = antinode_cords;
         antinode_cords = antinode_cords->next;
         xfree(temp);
     }
 
-    for (int y = 0; y < ysize; y++) {
-#if 0
-        printf("%s\n", input[y]);
-#endif
 
-        for (int x = 0; x < xsize; x++)
-            if (input[y][x] == '#')
+    for (int y = 0; field_inbounds(area, 0, y); y++)
+        for (int x = 0; field_inbounds(area, x, 0); x++)
+            if (field_get(area, x, y) == '#')
                 num_antinodes++;
-    }
 
     printf("Number of antinodes(p2): %d\n", num_antinodes);
-
-    xfree(input);
 
     return EXIT_SUCCESS;
 }
