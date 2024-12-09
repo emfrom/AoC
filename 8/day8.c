@@ -5,6 +5,12 @@
 #include <ctype.h>
 #include "../utility_blob.c"
 
+// Notes: Day 8
+// (On the road and very tired)
+//
+// Not a pretty solutions but it worked 
+// Tried to prettyfiy it and broke it so, sleeptime.
+
 typedef struct cordinate_s *cordinate;
 struct cordinate_s {
     int x;

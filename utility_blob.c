@@ -153,7 +153,6 @@ char **xload_lines(const char *filename, int *number_lines)
         fprintf(stderr, "xload_lines() -> empty file\n");
         exit(EXIT_FAILURE);
     }
-
     //Terminate
     size = (num_lines + 1) * sizeof(char *);
     lines[num_lines] = NULL;
