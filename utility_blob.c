@@ -279,3 +279,76 @@ linked_list linked_list_destroy(linked_list head,
 
     return NULL;
 }
+
+
+struct field_s {
+    int xsize;
+    int ysize;
+    char **layout;
+};
+typedef struct field_s *field;
+
+
+field field_create()
+{
+    field field_data;
+    int n_lines;
+
+    field_data = xmalloc(sizeof(struct field_s));
+
+    field_data->layout = xload_lines("input", &n_lines);        //For AoC
+    field_data->ysize = n_lines;
+    field_data->xsize = strlen(field_data->layout[0]);
+
+    return field_data;
+}
+
+
+field field_copy(field copy, field original)
+{
+    for (int i = 0; i < copy->ysize; i++)
+        strncpy(copy->layout[i], original->layout[i], copy->xsize + 1);
+
+    return copy;
+}
+
+int field_inbounds(field playarea, int x, int y)
+{
+    return !(x < 0 || y < 0 || x >= playarea->xsize
+             || y >= playarea->ysize);
+}
+
+
+void field_destroy(field playarea)
+{
+    xfree(playarea->layout);
+    xfree(playarea);
+
+}
+
+char field_get(field area, int x, int y)
+{
+    return area->layout[y][x];
+}
+
+void field_set(field area, int x, int y, char c)
+{
+    area->layout[y][x] = c;
+}
+
+field field_soliton = NULL;
+
+void field_soliton_destroy()
+{
+    if (NULL != field_soliton)
+        field_destroy(field_soliton);
+}
+
+field field_soliton_get()
+{
+    if (NULL == field_soliton) {
+        field_soliton = field_create();
+        atexit(field_soliton_destroy);
+    }
+    return field_soliton;
+}

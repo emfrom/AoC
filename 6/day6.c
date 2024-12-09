@@ -23,60 +23,10 @@
 // .. but it works. Sigh..
 
 
-
-struct field_s {
-    int xsize;
-    int ysize;
-    char **layout;
-};
-typedef struct field_s *field;
-
-
-field field_create()
+int field_blocked(field playarea, int x, int y)
 {
-    field field_data;
-    uint64_t n_lines;
-
-    field_data = xmalloc(sizeof(struct field_s));
-
-    field_data->layout = xload_lines("input", &n_lines);
-    field_data->ysize = n_lines;
-    field_data->xsize = strlen(field_data->layout[0]);
-
-    return field_data;
+    return field_get(playarea, x, y) == '#';
 }
-
-
-field field_copy(field copy, field original)
-{
-    for (int i = 0; i < copy->ysize; i++)
-        strncpy(copy->layout[i], original->layout[i], copy->xsize + 1);
-
-    return copy;
-}
-
-
-int field_pos_blocked(field playarea, int x, int y)
-{
-    return playarea->layout[y][x] == '#';
-}
-
-
-int field_pos_inbounds(field playarea, int x, int y)
-{
-    return !(x < 0 || y < 0 || x >= playarea->xsize
-             || y >= playarea->ysize);
-}
-
-
-void field_destroy(field playarea)
-{
-    xfree(playarea);
-}
-
-
-
-
 
 struct guard_s {
     int16_t x;
@@ -140,11 +90,11 @@ guard guard_move(guard lawman)
     newx = lawman->x + dx[lawman->direction];
     newy = lawman->y + dy[lawman->direction];
 
-    if (!field_pos_inbounds(lawman->playarea, newx, newy)) {
+    if (!field_inbounds(lawman->playarea, newx, newy)) {
         return NULL;
     }
 
-    while (field_pos_blocked(lawman->playarea, newx, newy)) {
+    while (field_blocked(lawman->playarea, newx, newy)) {
         guard_turn(lawman);
 
         newx = lawman->x + dx[lawman->direction];
