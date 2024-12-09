@@ -106,7 +106,36 @@ int frequency_index(char c)
 
 #define N_FREQUENCIES 62
 
+cordinate create_antinode_list(cordinate *list, int n_list,
+                               cordinate(*function) (cordinate A,
+                                                     cordinate B))
+{
+    cordinate cords = NULL;
+    for (int i = 0; i < n_list; i++)
+        if (list[i] != NULL) {
+            cordinate temp_outer = list[i];
+            cordinate temp_inner;
 
+            while (temp_outer != NULL) {
+                temp_inner = temp_outer->next;
+
+                while (temp_inner != NULL) {
+                    cordinate antinode;
+
+                    antinode = function(temp_outer, temp_inner);
+                    cords = cordinate_chain(antinode, cords);
+
+                    antinode = function(temp_inner, temp_outer);
+                    cords = cordinate_chain(antinode, cords);
+
+                    temp_inner = temp_inner->next;
+                }
+
+                temp_outer = temp_outer->next;
+            }
+        }
+    return cords;
+}
 
 int main()
 {
@@ -126,34 +155,12 @@ int main()
 
             }
 
-    cordinate antinode_cords = NULL;
-    for (int i = 0; i < N_FREQUENCIES; i++)
-        if (tower_list[i] != NULL) {
-            cordinate temp_outer = tower_list[i];
-            cordinate temp_inner;
+    cordinate antinode_cords;
+    antinode_cords =
+        create_antinode_list(tower_list, N_FREQUENCIES,
+                             cordinate_get_antinode);
 
-            while (temp_outer != NULL) {
-                temp_inner = temp_outer->next;
 
-                while (temp_inner != NULL) {
-                    cordinate antinode;
-
-                    antinode =
-                        cordinate_get_antinode(temp_outer, temp_inner);
-                    antinode_cords =
-                        cordinate_chain(antinode, antinode_cords);
-
-                    antinode =
-                        cordinate_get_antinode(temp_inner, temp_outer);
-                    antinode_cords =
-                        cordinate_chain(antinode, antinode_cords);
-
-                    temp_inner = temp_inner->next;
-                }
-
-                temp_outer = temp_outer->next;
-            }
-        }
     //Plot them to remove duplicates
     while (NULL != antinode_cords) {
         int x, y;
@@ -180,44 +187,9 @@ int main()
 
     //Problem 2
     num_antinodes = 0;
-    antinode_cords = NULL;
-
-    for (int i = 0; i < N_FREQUENCIES; i++)
-        if (tower_list[i] != NULL) {
-            cordinate temp_outer = tower_list[i];
-            cordinate temp_inner;
-
-            while (temp_outer != NULL) {
-                temp_inner = temp_outer->next;
-
-                while (temp_inner != NULL) {
-                    cordinate antinode;
-
-                    antinode =
-                        cordinate_get_antinodes(temp_outer, temp_inner);
-                    if (NULL != antinode)
-                        antinode_cords =
-                            cordinate_chain(antinode, antinode_cords);
-
-                    antinode =
-                        cordinate_get_antinodes(temp_inner, temp_outer);
-                    if (NULL != antinode)
-                        antinode_cords =
-                            cordinate_chain(antinode, antinode_cords);
-
-                    temp_inner = temp_inner->next;
-                }
-
-                temp_outer = temp_outer->next;
-            }
-
-            temp_outer = tower_list[i];
-            while (NULL != temp_outer) {
-                temp_inner = temp_outer;
-                temp_outer = temp_outer->next;
-                xfree(temp_inner);
-            }
-        }
+    antinode_cords =
+        create_antinode_list(tower_list, N_FREQUENCIES,
+                             cordinate_get_antinodes);
 
     //Plot them to remove duplicates
     while (NULL != antinode_cords) {
@@ -240,6 +212,12 @@ int main()
                 num_antinodes++;
 
     printf("Number of antinodes(p2): %d\n", num_antinodes);
+
+
+    for (int i = 0; i < N_FREQUENCIES; i++)
+        if (tower_list[i] != NULL)
+            xfree(tower_list[i]);
+
 
     return EXIT_SUCCESS;
 }
