@@ -352,3 +352,11 @@ field field_soliton_get()
     }
     return field_soliton;
 }
+
+void field_for_all(field area, void (*function)(int, int, void *),
+                   void *data)
+{
+    for (int y = 0; y < area->ysize; y++)
+        for (int x = 0; x < area->xsize; x++)
+            function(x, y, data);
+}

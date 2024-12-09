@@ -139,6 +139,28 @@ cordinate create_antinode_list(cordinate *list, int n_list,
     return cords;
 }
 
+void find_towers(int x, int y, void *temp)
+{
+    cordinate *tower_list = temp;
+    field area = field_soliton_get();
+
+    if (isalnum(field_get(area, x, y))) {
+        int index = frequency_index(field_get(area, x, y));
+
+        tower_list[index] =
+            cordinate_chain(cordinate_create(x, y), tower_list[index]);
+    }
+}
+
+void count_antinodes(int x, int y, void *temp)
+{
+    field area = field_soliton_get();
+    int *num_antinodes = temp;
+
+    if (field_get(area, x, y) == '#')
+        *num_antinodes += 1;
+}
+
 int main()
 {
     field area;
@@ -146,16 +168,7 @@ int main()
 
 
     cordinate tower_list[N_FREQUENCIES] = { NULL };
-    for (int y = 0; field_inbounds(area, 0, y); y++)
-        for (int x = 0; field_inbounds(area, x, 0); x++)
-            if (isalnum(field_get(area, x, y))) {
-                int index = frequency_index(field_get(area, x, y));
-
-                tower_list[index] =
-                    cordinate_chain(cordinate_create(x, y),
-                                    tower_list[index]);
-
-            }
+    field_for_all(area, find_towers, tower_list);
 
     cordinate antinode_cords;
     antinode_cords =
@@ -177,10 +190,7 @@ int main()
     }
 
     int num_antinodes = 0;
-    for (int y = 0; field_inbounds(area, 0, y); y++)
-        for (int x = 0; field_inbounds(area, x, 0); x++)
-            if (field_get(area, x, y) == '#')
-                num_antinodes++;
+    field_for_all(area, count_antinodes, &num_antinodes);
 
     printf("Number of antinodes(p1): %d\n", num_antinodes);
 
@@ -206,10 +216,7 @@ int main()
         xfree(temp);
     }
 
-    for (int y = 0; field_inbounds(area, 0, y); y++)
-        for (int x = 0; field_inbounds(area, x, 0); x++)
-            if (field_get(area, x, y) == '#')
-                num_antinodes++;
+    field_for_all(area, count_antinodes, &num_antinodes);
 
     printf("Number of antinodes(p2): %d\n", num_antinodes);
 
