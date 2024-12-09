@@ -8,7 +8,7 @@
 
 // Notes day 9
 //
-// I optimized to early today. I had my eye on the never doing anything twice
+// I optimized too early today. I had my eye on the never doing anything twice
 // and shrinking the area where I was looking for empty spaces to fill
 //
 // Overall pretty happy with it
@@ -128,7 +128,6 @@ int *find_id_backwards(int id, int **end, int *len)
         pos--;
 
     *len = 0;
-    *end = pos;
 
     while (*pos == id) {
         *len += 1;
@@ -136,6 +135,7 @@ int *find_id_backwards(int id, int **end, int *len)
     }
 
     pos++;
+    *end = pos;
 
     return pos;
 }
@@ -159,9 +159,12 @@ int *defragment(int *blocks, int n_blocks)
 
     int *end = blocks + n_blocks - 1;
 
-    for (int id = find_last_id(end); id >= 0; id--) {
+    for (int id = find_last_id(end); id >= 1; id--) {
         int len;
         int *pos = find_id_backwards(id, &end, &len);
+        if (pos < free_space_hints[0])
+            break;
+
         int *target = find_free_block(free_space_hints[len], pos, len);
 
         free_space_hints[len] = target;
@@ -230,6 +233,9 @@ int main()
     disk_layout = defragment(disk_layout, disk_size);
 
     printf("Problem 2: %lu\n", calc_checksum(disk_layout, disk_size));
+
+    xfree(disk_layout);
+    xfree(input);
 
     return EXIT_SUCCESS;
 }
