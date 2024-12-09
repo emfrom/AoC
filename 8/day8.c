@@ -1,9 +1,9 @@
+#include "../utility_blob.c"
+#include <ctype.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
-#include <ctype.h>
-#include "../utility_blob.c"
 
 // Notes: Day 8
 // (On the road and very tired)
@@ -20,7 +20,6 @@ struct cordinate_s {
 
     cordinate next;
 };
-
 
 cordinate cordinate_create(int x, int y)
 {
@@ -98,7 +97,6 @@ cordinate cordinate_get_antinodes(cordinate cordA, cordinate cordB)
     return antinodes;
 }
 
-
 int frequency_index(char c)
 {
     return ((c) >= 'a' && (c) <= 'z' ? (c) - 'a'
@@ -141,11 +139,14 @@ cordinate create_antinode_list(cordinate *list, int n_list,
 
 void find_towers(int x, int y, void *temp)
 {
-    cordinate *tower_list = temp;
     field area = field_soliton_get();
 
-    if (isalnum(field_get(area, x, y))) {
-        int index = frequency_index(field_get(area, x, y));
+    cordinate *tower_list = temp;
+
+    char c = field_get(area, x, y);
+
+    if (isalnum(c)) {
+        int index = frequency_index(c);
 
         tower_list[index] =
             cordinate_chain(cordinate_create(x, y), tower_list[index]);
@@ -155,6 +156,7 @@ void find_towers(int x, int y, void *temp)
 void count_antinodes(int x, int y, void *temp)
 {
     field area = field_soliton_get();
+
     int *num_antinodes = temp;
 
     if (field_get(area, x, y) == '#')
@@ -166,7 +168,6 @@ int main()
     field area;
     area = field_soliton_get();
 
-
     cordinate tower_list[N_FREQUENCIES] = { NULL };
     field_for_all(area, find_towers, tower_list);
 
@@ -175,7 +176,7 @@ int main()
         create_antinode_list(tower_list, N_FREQUENCIES,
                              cordinate_get_antinode);
 
-    //Plot them to remove duplicates
+    // Plot them to remove duplicates
     while (NULL != antinode_cords) {
         int x, y;
         x = antinode_cords->x;
@@ -194,15 +195,13 @@ int main()
 
     printf("Number of antinodes(p1): %d\n", num_antinodes);
 
-
-
-    //Problem 2
+    // Problem 2
     num_antinodes = 0;
     antinode_cords =
         create_antinode_list(tower_list, N_FREQUENCIES,
                              cordinate_get_antinodes);
 
-    //Plot them to remove duplicates
+    // Plot them to remove duplicates
     while (NULL != antinode_cords) {
         int x, y;
         x = antinode_cords->x;
@@ -219,7 +218,6 @@ int main()
     field_for_all(area, count_antinodes, &num_antinodes);
 
     printf("Number of antinodes(p2): %d\n", num_antinodes);
-
 
     for (int i = 0; i < N_FREQUENCIES; i++)
         if (tower_list[i] != NULL)
