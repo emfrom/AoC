@@ -12,7 +12,13 @@
 // and shrinking the area where I was looking for empty spaces to fill
 //
 // Overall pretty happy with it
-
+//
+// edit: More than happy with it actually, P2 solution is O(n)
+//       This is since both helper functions only ever visit a location k times,
+//       k < 10
+//       Moving and managing the hints is also k < 10 each
+//       ergo, O(n) 
+//       
 #define FILE 1
 #define FREESPACE -1
 
