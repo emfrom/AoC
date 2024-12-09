@@ -23,6 +23,11 @@
 // .. but it works. Sigh..
 
 
+int field_blocked(field playarea, int x, int y)
+{
+    return field_get(playarea, x, y) == '#';
+}
+
 struct guard_s {
     int16_t x;
     int16_t y;
@@ -85,11 +90,11 @@ guard guard_move(guard lawman)
     newx = lawman->x + dx[lawman->direction];
     newy = lawman->y + dy[lawman->direction];
 
-    if (!field_pos_inbounds(lawman->playarea, newx, newy)) {
+    if (!field_inbounds(lawman->playarea, newx, newy)) {
         return NULL;
     }
 
-    while (field_pos_blocked(lawman->playarea, newx, newy)) {
+    while (field_blocked(lawman->playarea, newx, newy)) {
         guard_turn(lawman);
 
         newx = lawman->x + dx[lawman->direction];

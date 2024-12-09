@@ -312,14 +312,7 @@ field field_copy(field copy, field original)
     return copy;
 }
 
-
-int field_pos_blocked(field playarea, int x, int y)
-{
-    return playarea->layout[y][x] == '#';
-}
-
-
-int field_pos_inbounds(field playarea, int x, int y)
+int field_inbounds(field playarea, int x, int y)
 {
     return !(x < 0 || y < 0 || x >= playarea->xsize
              || y >= playarea->ysize);
