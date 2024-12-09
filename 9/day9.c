@@ -6,6 +6,13 @@
 #include <sys/types.h>
 #include "../utility_blob.c"
 
+// Notes day 9
+//
+// I optimized to early today. I had my eye on the never doing anything twice
+// and shrinking the area where I was looking for empty spaces to fill
+//
+// Overall pretty happy with it
+
 #define FILE 1
 #define FREESPACE -1
 
@@ -112,13 +119,16 @@ int find_last_id(int *end)
     return *end;
 }
 
-int *find_id_backwards(int id, int *pos, int *len)
+int *find_id_backwards(int id, int **end, int *len)
 {
+
+    int *pos = *end;
 
     while (*pos != id)
         pos--;
 
     *len = 0;
+    *end = pos;
 
     while (*pos == id) {
         *len += 1;
@@ -151,7 +161,7 @@ int *defragment(int *blocks, int n_blocks)
 
     for (int id = find_last_id(end); id >= 0; id--) {
         int len;
-        int *pos = find_id_backwards(id, end, &len);
+        int *pos = find_id_backwards(id, &end, &len);
         int *target = find_free_block(free_space_hints[len], pos, len);
 
         free_space_hints[len] = target;
@@ -164,13 +174,6 @@ int *defragment(int *blocks, int n_blocks)
         for (int i = len + 1; i < 10; i++)
             if (free_space_hints[i] < free_space_hints[len])
                 free_space_hints[i] = free_space_hints[len];
-
-        // Not interested in space or higher than id blocks
-        while (*end == FREESPACE || *end > id)
-            --end;
-
-        if (end < blocks + n_blocks - 2)        //Grr
-            ++end;
 
 #if 0
         for (int i = 0; i < n_blocks; i++) {
