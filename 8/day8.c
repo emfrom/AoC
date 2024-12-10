@@ -13,47 +13,6 @@
 //
 // Day after, all prettyfied
 
-typedef struct cordinate_s *cordinate;
-struct cordinate_s {
-    int x;
-    int y;
-
-    cordinate next;
-};
-
-cordinate cordinate_create(int x, int y)
-{
-    cordinate cord = xmalloc(sizeof(struct cordinate_s));
-
-    cord->x = x;
-    cord->y = y;
-
-    cord->next = NULL;
-
-    return cord;
-}
-
-cordinate cordinate_chain(cordinate first, cordinate second)
-{
-    cordinate temp = first;
-    while (temp->next != NULL)
-        temp = temp->next;
-
-    temp->next = second;
-
-#if 0
-    temp = first;
-    int count = 0;
-    while (temp != NULL) {
-        temp = temp->next;
-        count++;
-    }
-    printf("Chained %d coordinates\n", count);
-#endif
-
-    return first;
-}
-
 cordinate cordinate_get_antinode(cordinate cordA, cordinate cordB)
 {
     int dx;

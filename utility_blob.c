@@ -284,7 +284,7 @@ linked_list linked_list_destroy(linked_list head,
 struct field_s {
     int xsize;
     int ysize;
-    char **layout;
+    char **content;
 };
 typedef struct field_s *field;
 
@@ -296,9 +296,9 @@ field field_create()
 
     field_data = xmalloc(sizeof(struct field_s));
 
-    field_data->layout = xload_lines("input", &n_lines);        //For AoC
+    field_data->content = xload_lines("input", &n_lines);       //For AoC
     field_data->ysize = n_lines;
-    field_data->xsize = strlen(field_data->layout[0]);
+    field_data->xsize = strlen(field_data->content[0]);
 
     return field_data;
 }
@@ -307,7 +307,7 @@ field field_create()
 field field_copy(field copy, field original)
 {
     for (int i = 0; i < copy->ysize; i++)
-        strncpy(copy->layout[i], original->layout[i], copy->xsize + 1);
+        strncpy(copy->content[i], original->content[i], copy->xsize + 1);
 
     return copy;
 }
@@ -321,19 +321,19 @@ int field_inbounds(field playarea, int x, int y)
 
 void field_destroy(field playarea)
 {
-    xfree(playarea->layout);
+    xfree(playarea->content);
     xfree(playarea);
 
 }
 
 char field_get(field area, int x, int y)
 {
-    return area->layout[y][x];
+    return area->content[y][x];
 }
 
 void field_set(field area, int x, int y, char c)
 {
-    area->layout[y][x] = c;
+    area->content[y][x] = c;
 }
 
 field field_soliton = NULL;
@@ -359,4 +359,52 @@ void field_for_all(field area, void (*function)(int, int, void *),
     for (int y = 0; y < area->ysize; y++)
         for (int x = 0; x < area->xsize; x++)
             function(x, y, data);
+}
+
+void field_print(field area)
+{
+    for (int i = 0; i < area->ysize; i++)
+        printf("%s\n", area->content[i]);
+}
+
+
+typedef struct cordinate_s *cordinate;
+struct cordinate_s {
+    int x;
+    int y;
+
+    cordinate next;
+};
+
+cordinate cordinate_create(int x, int y)
+{
+    cordinate cord = xmalloc(sizeof(struct cordinate_s));
+
+    cord->x = x;
+    cord->y = y;
+
+    cord->next = NULL;
+
+    return cord;
+}
+
+cordinate cordinate_chain(cordinate first, cordinate second)
+{
+    cordinate temp = first;
+    while (temp->next != NULL)
+        temp = temp->next;
+
+    temp->next = second;
+
+#if 0
+    temp = first;
+    int count = 0;
+    while (temp != NULL) {
+        temp = temp->next;
+        count++;
+    }
+    printf("Chained %d coordinates\n", count);
+#endif
+
+    return first;
 }
