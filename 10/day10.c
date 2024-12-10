@@ -5,12 +5,18 @@
 #include <ctype.h>
 #include "../utility_blob.c"
 
+// Notes day 10
+//
+// Straightforward path finding, recursive solution
+//
+// Problem 2 was solved by commenting out one line in the problem 1 solution
 
-int trails_score(field area, int x, int y)
+
+int trails_score(field area, int x, int y, cordinate *ends)
 {
     char c = field_get(area, x, y);
 
-#if 1
+#if 0
     field_set(area, x, y, '#');
     field_print(area);
     field_set(area, x, y, c);
@@ -18,7 +24,10 @@ int trails_score(field area, int x, int y)
 #endif
 
     if (c == '9') {
+#ifdef PROBLEM_1
+        *ends = cordinate_chain(cordinate_create(x, y), *ends); //Sometimes
         field_set(area, x, y, '#');
+#endif
         return 1;
     }
 
@@ -31,7 +40,7 @@ int trails_score(field area, int x, int y)
     for (int i = 0; i < 4; i++)
         if (field_inbounds(area, x + dx[i], y + dy[i]))
             if (c == field_get(area, x + dx[i], y + dy[i]))
-                score += trails_score(area, x + dx[i], y + dy[i]);
+                score += trails_score(area, x + dx[i], y + dy[i], ends);
 
     return score;
 }
@@ -39,11 +48,22 @@ int trails_score(field area, int x, int y)
 void find_trails(int x, int y, void *temp)
 {
     field area = field_soliton_get();
+
+    if ('0' != field_get(area, x, y))
+        return;
+
     int *n_trails = temp;
+    cordinate ends = NULL;
 
-    if ('0' == field_get(area, x, y))
-        *n_trails += trails_score(area, x, y);
+    *n_trails += trails_score(area, x, y, &ends);
 
+    while (ends != NULL) {
+        cordinate temp = ends;
+        field_set(area, ends->x, ends->y, '9');
+
+        ends = ends->next;
+        xfree(temp);
+    }
 }
 
 
@@ -51,7 +71,7 @@ int main()
 {
     field island = field_soliton_get();
 
-#if 1
+#if 0
     field_print(island);
     printf("\n");
 #endif
