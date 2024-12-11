@@ -110,7 +110,7 @@ char **xload_lines(const char *filename, int *number_lines)
     char *end_of_line = strchr(current_line, '\n');
 
     if (NULL == end_of_line) {
-        // Entire file is one string
+        // Entire file is one line
         int line_length = strlen(current_line);
         if (line_length) {
             end_of_line = current_line + line_length;
@@ -177,6 +177,35 @@ char **xload_lines(const char *filename, int *number_lines)
         *number_lines = num_lines;
 
     return lines;
+}
+
+//for stuff loaded with xload_lines
+char **xdup_lines(char **lines)
+{
+    char **temp = lines;
+    int end = 0;
+
+    while (temp[end] != NULL)
+        end++;
+    end--;
+
+    char *last_line = temp[end];
+    while (*last_line != '\0')
+        last_line++;
+    last_line++;
+
+    size_t size = last_line - (char *) lines;
+
+    temp = xmalloc(size);
+    memcpy(temp, lines, size);
+
+    //Adjust pointers
+    off_t adjustment = temp - lines;
+
+    for (int i = 0; temp[i] != NULL; i++)
+        temp[i] = temp[i] + adjustment;
+
+    return temp;
 }
 
 #include <regex.h>
@@ -312,6 +341,17 @@ field field_copy(field copy, field original)
     return copy;
 }
 
+field field_duplicate(field original)
+{
+    field new = xmalloc(sizeof(struct field_s));
+
+    new->xsize = original->xsize;
+    new->ysize = original->ysize;
+    new->content = xdup_lines(original->content);
+
+    return new;
+}
+
 int field_inbounds(field playarea, int x, int y)
 {
     return !(x < 0 || y < 0 || x >= playarea->xsize
@@ -342,6 +382,8 @@ void field_soliton_destroy()
 {
     if (NULL != field_soliton)
         field_destroy(field_soliton);
+
+    field_soliton = NULL;
 }
 
 field field_soliton_get()

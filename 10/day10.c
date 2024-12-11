@@ -76,11 +76,16 @@ int main()
     printf("\n");
 #endif
 
-    int trails_total_score = 0;
-    field_for_all(island, find_trails, &trails_total_score);
 
+    int trails_total_rating = 0;
+    field_for_all(island, find_trails, &trails_total_rating);
+
+
+#ifdef PROBLEM_1
     printf("Problem 1: %d\n", trails_total_score);
-
+#else
+    printf("Problem 2: %d\n", trails_total_rating);
+#endif
 
     return EXIT_SUCCESS;
 }
