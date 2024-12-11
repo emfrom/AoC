@@ -4,9 +4,17 @@
 #include <stdint.h>
 #include <string.h>
 
+
+
 void *xmalloc(size_t size)
 {
     void *retval = malloc(size);
+#if 0
+    static size_t alloc = 0;
+
+    alloc += size;
+    fprintf(stderr, "malloc total: %lu\n", alloc);
+#endif
 
     if (NULL == retval) {
         fprintf(stderr, "malloc() -> NULL\n");
@@ -245,7 +253,7 @@ linked_list linked_list_prepend(linked_list head, void *data)
     return new_node;
 }
 
-#if REALLY_NECESSARY
+
 linked_list linked_list_append(linked_list head, void *data)
 {
     linked_list new_node =
@@ -263,18 +271,23 @@ linked_list linked_list_append(linked_list head, void *data)
     current->next = new_node;
     return head;
 }
-#endif
 
 
-linked_list linked_list_duplicate(linked_list head)
+
+linked_list linked_list_duplicate(linked_list head,
+                                  void *(*dup_data)(void *))
 {
-    if (!head) {
+    if(!head) {
         return NULL;
     }
-
+    //ick, very ugly
     linked_list new_head =
         (linked_list) xmalloc(sizeof(struct linked_list_s));
-    new_head->data = head->data;
+    if (NULL == dup_data)
+        new_head->data = head->data;    // Shallow
+    else
+        new_head->data = dup_data(head->data);
+
     new_head->next = NULL;
 
     linked_list current = head->next;
@@ -283,7 +296,12 @@ linked_list linked_list_duplicate(linked_list head)
     while (current) {
         linked_list new_node =
             (linked_list) xmalloc(sizeof(struct linked_list_s));
-        new_node->data = current->data; // Shallow copy
+
+        if (NULL == dup_data)
+            new_node->data = current->data;     //Shallow
+        else
+            new_node->data = dup_data(current->data);
+
         new_node->next = NULL;
 
         new_current->next = new_node;
@@ -307,6 +325,27 @@ linked_list linked_list_destroy(linked_list head,
     }
 
     return NULL;
+}
+
+void linked_list_for_each(linked_list head,
+                          void (*function)(void *, void *), void *userdata)
+{
+    while (head != NULL) {
+        function(head->data, userdata);
+        head = head->next;
+    }
+}
+
+int linked_list_length(linked_list list)
+{
+    int len = 0;
+
+    while (NULL != list) {
+        list = list->next;
+        len++;
+    }
+
+    return len;
 }
 
 
