@@ -327,8 +327,8 @@ linked_list linked_list_destroy(linked_list head,
     return NULL;
 }
 
-void linked_list_for_each(linked_list head,
-                          void (*function)(void *, void *), void *userdata)
+void linked_list_map(linked_list head, void (*function)(void *, void *),
+                     void *userdata)
 {
     while (head != NULL) {
         function(head->data, userdata);
@@ -519,12 +519,14 @@ hash_table hash_table_create(uint64_t size_hint,
 {
     hash_table table = xmalloc(sizeof(struct hash_table_s));
 
-    table->size = 65536;        //Smaller doesnt make much sense note 2^16, not 2^16 - 1!
+    //Smaller doesnt make much sense
+    // Note: 2^16, not 2^16 - 1
+    table->size = 65536;
 
     while (table->size < size_hint)
         table->size = table->size << 1; //Fails if size_hint = UINT64_MAX
 
-    table->mask = table->size - 1;
+    table->mask = table->size - 1;      //modulo sucks
 
     table->array = xmalloc(table->size);
 
@@ -608,9 +610,9 @@ hash_table hash_table_destroy(hash_table table, void (*free_func)(void *))
     return NULL;
 }
 
-uint64_t hash_integer(void *temp)
+uint64_t hash_u64(void *temp)
 {
-    //Thank you GPT for the constants
+    //Thank you GPT for the primes
     const uint64_t prime_multiplier = 11400714819323198485ULL;
     const uint64_t prime_addition = 14029467366897019727ULL;
 
