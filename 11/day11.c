@@ -183,6 +183,7 @@ linked_list cache_get_list(uint64_t num)
 
 // For problem 2 i need the depth first algorithm.
 // Max recursion depth = number of blinks + original length of list
+// (same problem as the BFS actually, forgot the space evolution)
 uint64_t depth_first(linked_list list, int blinks_left)
 {
     if (NULL == list)
@@ -276,13 +277,15 @@ int main(int argument_count, char **argument_vector)
 #endif
 
 
-    n_stones = depth_first(list, n_blinks);
-    printf("Problem 2: %lu\n", n_stones);
-    linked_list_destroy(list, xfree);
+    /* n_stones = depth_first(list, n_blinks); */
+    /* printf("Problem 2: %lu\n", n_stones); */
+    /* linked_list_destroy(list, xfree); */
+    /*  cache_destroy(); */
 
-    //  linked_list_for_each(cache_get_list(1), print_list, stdout);
+    for (int i = 0; i < 100; i++)
+        linked_list_for_each(cache_get_list(i), print_list, stdout);
 
-    cache_destroy();
+
 
     return EXIT_SUCCESS;
 }
