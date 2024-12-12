@@ -528,10 +528,10 @@ hash_table hash_table_create(uint64_t size_hint,
 
     table->mask = table->size - 1;      //modulo sucks
 
-    table->array = xmalloc(table->size);
+    table->array = xmalloc(table->size * sizeof(hash_table_entry));
 
     for (uint64_t i = 0; i < table->size; i++)
-        table->array = NULL;
+        table->array[i] = NULL;
 
     table->hash_function = hash_function;
 
@@ -544,13 +544,14 @@ hash_table hash_table_insert(hash_table table, void *data)
     uint64_t index = hash & table->mask;
 
     if (NULL != table->array[index]) {
-        fprintf(stderr, "hash_table_insert() -> Implement collision!\n");
+        fprintf(stderr,
+                "hash_table_insert() -> Implement collision! (occupied)\n");
         exit(EXIT_FAILURE);
     }
 
-    table->array[hash] = xmalloc(sizeof(struct hash_table_entry_s));
-    table->array[hash]->hash = hash;
-    table->array[hash]->data = data;
+    table->array[index] = xmalloc(sizeof(struct hash_table_entry_s));
+    table->array[index]->hash = hash;
+    table->array[index]->data = data;
 
     return table;
 }
@@ -564,7 +565,8 @@ void *hash_table_find(hash_table table, void *data)
         return NULL;
 
     if (hash != table->array[index]->hash) {
-        fprintf(stderr, "hash_table_find() -> Implement collision!\n");
+        fprintf(stderr,
+                "hash_table_find() -> Implement collision! (mismatch)\n");
         exit(EXIT_FAILURE);
     }
 
