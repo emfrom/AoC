@@ -489,3 +489,149 @@ cordinate cordinate_chain(cordinate first, cordinate second)
 
     return first;
 }
+
+
+struct hash_table_entry_s {
+    uint64_t hash;              //for collisions
+    void *data;
+};
+typedef struct hash_table_entry_s *hash_table_entry;
+
+struct hash_table_s {
+    uint64_t size;
+    uint64_t mask;
+    hash_table_entry *array;
+     uint64_t(*hash_function) (void *data);
+
+    //I'll impl these if I need them
+    //  void *(*insert_collision_handler)(hash_table_entry, void *);
+    //  void *insert_userdata;
+    //  void *(*find_collision_handler)(hash_table_entry,, void *);
+    //  void *find_userdata;
+    //  void *(*remove_collision_handler)(hash_table_entry, void *);
+    //  void *remove_userdata;
+};
+typedef struct hash_table_s *hash_table;
+
+
+hash_table hash_table_create(uint64_t size_hint,
+                             uint64_t(*hash_function) (void *data))
+{
+    hash_table table = xmalloc(sizeof(struct hash_table_s));
+
+    table->size = 65536;        //Smaller doesnt make much sense note 2^16, not 2^16 - 1!
+
+    while (table->size < size_hint)
+        table->size = table->size << 1; //Fails if size_hint = UINT64_MAX
+
+    table->mask = table->size - 1;
+
+    table->array = xmalloc(table->size);
+
+    for (uint64_t i = 0; i < table->size; i++)
+        table->array = NULL;
+
+    table->hash_function = hash_function;
+
+    return table;
+}
+
+hash_table hash_table_insert(hash_table table, void *data)
+{
+    uint64_t hash = table->hash_function(data);
+    uint64_t index = hash & table->mask;
+
+    if (NULL != table->array[index]) {
+        fprintf(stderr, "hash_table_insert() -> Implement collision!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    table->array[hash] = xmalloc(sizeof(struct hash_table_entry_s));
+    table->array[hash]->hash = hash;
+    table->array[hash]->data = data;
+
+    return table;
+}
+
+void *hash_table_find(hash_table table, void *data)
+{
+    uint64_t hash = table->hash_function(data);
+    uint64_t index = hash & table->mask;
+
+    if (NULL == table->array[index])
+        return NULL;
+
+    if (hash != table->array[index]->hash) {
+        fprintf(stderr, "hash_table_find() -> Implement collision!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return table->array[index]->data;
+}
+
+void hash_table_remove(hash_table table, uint64_t hash,
+                       void (*free_func)(void *))
+{
+    uint64_t index = hash & table->mask;
+
+    //Silently ignore nonexitssnt removes
+    if (NULL == table->array[index])
+        return;
+
+    if (NULL != free_func)
+        free_func(table->array[index]->data);
+
+    xfree(table->array[index]);
+
+    table->array[index] = NULL;
+
+}
+
+void hash_table_delete(hash_table table, void *data,
+                       void (*free_func)(void *))
+{
+    uint64_t hash = table->hash_function(data);
+
+    hash_table_remove(table, hash, free_func);
+    return;
+}
+
+hash_table hash_table_destroy(hash_table table, void (*free_func)(void *))
+{
+
+    for (uint64_t i = 0; i < table->size; i++)
+        if (table->array[i] != NULL)
+            hash_table_remove(table, i, free_func);
+
+    xfree(table);
+
+    return NULL;
+}
+
+uint64_t hash_integer(void *temp)
+{
+    //Thank you GPT for the constants
+    const uint64_t prime_multiplier = 11400714819323198485ULL;
+    const uint64_t prime_addition = 14029467366897019727ULL;
+
+    uint64_t *value = temp;
+    return *value * prime_multiplier + prime_addition;
+}
+
+uint64_t hash_asciiz(void *temp)
+{
+    // FNV-1a (again, thank you GPT)
+    const uint64_t fnv_prime = 1099511628211ULL;
+    const uint64_t fnv_offset_basis = 14695981039346656037ULL;
+
+    uint64_t hash = fnv_offset_basis;
+    char *str = temp;
+
+    while (*str) {
+        hash ^= (uint8_t) (*str);
+        hash *= fnv_prime;
+        str++;
+    }
+
+    return hash;
+}
