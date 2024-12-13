@@ -273,6 +273,40 @@ linked_list linked_list_append(linked_list head, void *data)
 }
 
 
+long linked_list_compare_default(void *a, void *b)
+{
+    return (a - b);
+}
+
+linked_list linked_list_remove(linked_list head, void *data,
+                               long (*compare_function)(void *, void *))
+{
+    if (NULL == compare_function)
+        compare_function = linked_list_compare_default;
+
+    linked_list temp = head;
+
+    if (0 == compare_function(head->data, data)) {
+        temp = head->next;
+        xfree(head);
+        return temp;
+    }
+
+    for (;;) {
+        if (temp->next == NULL)
+            return head;
+
+        if (0 == compare_function(temp->next->data, data)) {
+            void *to_free = temp->next;
+            temp->next = temp->next->next;
+            xfree(to_free);
+
+            return head;
+        }
+
+        temp = temp->next;
+    }
+}
 
 linked_list linked_list_duplicate(linked_list head,
                                   void *(*dup_data)(void *))
@@ -312,19 +346,115 @@ linked_list linked_list_duplicate(linked_list head,
     return new_head;
 }
 
-linked_list linked_list_destroy(linked_list head,
-                                void (*destroy_data)(void *data))
+//May create loops
+linked_list linked_list_concatenate(linked_list head, linked_list tail)
 {
-    linked_list current = head;
-    while (current) {
-        linked_list next = current->next;
-        if (NULL != destroy_data)
-            destroy_data(current->data);
-        xfree(current);
-        current = next;
+    if (head == NULL)
+        return tail;
+
+    if (tail == NULL)
+        return head;
+
+    linked_list temp = head;
+
+    while (temp->next != NULL)
+        temp = temp->next;
+
+    temp->next = tail;
+
+    return head;
+}
+
+linked_list linked_list_find(linked_list head, void *data,
+                             long (*compare_function)(void *, void *))
+{
+    if (NULL == head)
+        return NULL;
+
+    if (compare_function == NULL)
+        compare_function = linked_list_compare_default;
+
+    while (NULL != head) {
+        if (0 == compare_function(data, head->data))
+            return head;
+
+        head = head->next;
     }
 
     return NULL;
+}
+
+//Loop safe
+linked_list linked_list_destroy(linked_list head,
+                                void (*destroy_data)(void *data))
+{
+    if (NULL == head)
+        return NULL;
+
+    linked_list nodes = NULL;
+    linked_list node = head;
+    linked_list next;
+
+    while (node != NULL) {
+        if (NULL == linked_list_find(nodes, node, NULL))
+            nodes = linked_list_prepend(nodes, node);
+
+        next = node->next;
+        node = next;
+    }
+
+    next = nodes;
+    while (next) {
+        node = next->data;
+
+        if (destroy_data)
+            destroy_data(node->data);
+
+        xfree(node);            //Node from the original list
+        nodes = next;
+        next = next->next;
+        xfree(nodes);           //Node in the list of nodes
+    }
+
+    return NULL;
+}
+
+
+
+void linked_list_verify(linked_list temp)
+{
+    if (NULL == temp)
+        printf("<empty list>\n");
+
+    int depth = 0;
+
+    while (temp != NULL) {
+        for (int i = 0; i < depth; i++)
+            printf(" ");
+        depth++;
+
+#if 1
+        if (depth > 25) {
+            printf("B0rken list>");
+            getchar();
+        }
+#endif
+        printf("0x%lu", (uint64_t) temp);
+
+        if (temp->data != NULL)
+            printf(":%lu", (uint64_t) temp->data);
+        else
+            printf(":<NULL>");
+
+        if (temp->next != NULL)
+            printf(":%lu\n", (uint64_t) temp->next);
+        else
+            printf(":<NULL>\n");
+
+
+        temp = temp->next;
+    }
+
 }
 
 void linked_list_map(linked_list head, void (*function)(void *, void *),
@@ -434,12 +564,12 @@ field field_soliton_get()
     return field_soliton;
 }
 
-void field_for_all(field area, void (*function)(int, int, void *),
-                   void *data)
+void field_map(field area, void (*function)(int, int, void *),
+               void *userdata)
 {
     for (int y = 0; y < area->ysize; y++)
         for (int x = 0; x < area->xsize; x++)
-            function(x, y, data);
+            function(x, y, userdata);
 }
 
 void field_print(field area)
